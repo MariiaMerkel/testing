@@ -15,33 +15,54 @@ public class TestingApplication {
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
+
             try {
+                System.out.println("\nВведите, тип сортировки: 1 - по датам, 2 - по пересадкам");
+                Integer type = scanner.nextInt();
+                if (type == 1) {
 
-                System.out.println("\nВведите минимальную дату вылета в формате 'ГГГГ-ММ-ДД чч:мм'");
-                String departureDateMinStr = scanner.nextLine();
-                LocalDateTime departureDateMin = FlightService.pars(departureDateMinStr);
+                    System.out.println("\nВведите, если требуется, минимальную дату вылета в формате 'ГГГГ-ММ-ДД чч:мм', а иначе нажмите 'Enter'");
+                    String departureDateMinStr = scanner.nextLine();
+                    LocalDateTime departureDateMin = null;
+                    if (!departureDateMinStr.isEmpty()) {
+                        departureDateMin = FlightService.pars(departureDateMinStr);
+                    }
 
-                System.out.println("\nВведите максимальную дату вылета в формате 'ГГГГ-ММ-ДД чч:мм'");
-                String departureDateMaxStr = scanner.nextLine();
+                    System.out.println("\nВведите, если требуется, максимальную дату вылета в формате 'ГГГГ-ММ-ДД чч:мм', а иначе нажмите 'Enter'");
+                    String departureDateMaxStr = null;
+                    departureDateMaxStr = scanner.nextLine();
+                    LocalDateTime departureDateMax = null;
+                    if (!departureDateMaxStr.isEmpty()) {
+                        FlightService.pars(departureDateMaxStr);
+                    }
 
-                LocalDateTime departureDateMax = FlightService.pars(departureDateMaxStr);
+                    System.out.println("\nВведите, если требуется, минимальную дату прилёта в формате 'ГГГГ-ММ-ДД чч:мм', а иначе нажмите 'Enter'");
+                    String arrivalDateMinStr = scanner.nextLine();
+                    LocalDateTime arrivalDateMin = null;
+                    if (!arrivalDateMinStr.isEmpty()) {
+                        arrivalDateMin = FlightService.pars(arrivalDateMinStr);
+                    }
 
-                System.out.println("\nВведите минимальную дату прилёта в формате 'ГГГГ-ММ-ДД чч:мм'");
-                String arrivalDateMinStr = scanner.nextLine();
-                LocalDateTime arrivalDateMin = FlightService.pars(arrivalDateMinStr);
+                    System.out.println("\nВведите, если требуется, максимальную дату прилёта в формате 'ГГГГ-ММ-ДД чч:мм', а иначе нажмите 'Enter'");
+                    String arrivalDateMaxStr = scanner.nextLine();
+                    LocalDateTime arrivalDateMax = null;
+                    if (!arrivalDateMinStr.isEmpty()) {
+                        arrivalDateMax = FlightService.pars(arrivalDateMaxStr);
+                    }
+                    System.out.println(FlightBuilder.filter(departureDateMin, departureDateMax, arrivalDateMin, arrivalDateMax));
 
-                System.out.println("\nВведите максимальную дату прилёта в формате 'ГГГГ-ММ-ДД чч:мм'");
-                String arrivalDateMaxStr = scanner.nextLine();
-                LocalDateTime arrivalDateMax = FlightService.pars(arrivalDateMaxStr);
+                } else if (type == 2) {
+                    System.out.println("\nВведите, минимальное количество часов пересадки");
+                    Integer hours = scanner.nextInt();
 
-                FlightBuilder.filter(departureDateMin, departureDateMax, arrivalDateMin, arrivalDateMax);
+                    System.out.println(FlightBuilder.filter(hours));
+                } else {
+                    System.out.println("Неверно введён тип сортировки");
+                    throw new RuntimeException();
+                }
             } catch (Exception e) {
                 continue;
             }
-
-
         }
-
     }
-
 }

@@ -2,7 +2,7 @@ package com.gridnine.testing.builders;
 
 import com.gridnine.testing.models.Flight;
 import com.gridnine.testing.models.Segment;
-import com.gridnine.testing.services.FlightService;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,10 +47,32 @@ public class FlightBuilder {
     public static List<Flight> filter(LocalDateTime departureDateMin, LocalDateTime departureDateMax, LocalDateTime arrivalDateMin, LocalDateTime arrivalDateMax) {
 
         List<Flight> flights = createFlights();
-        return flights.stream().filter(f -> (
-                f.getSegments().get(0).getDepartureDate().isAfter(departureDateMin) &&
-                f.getSegments().get(0).getDepartureDate().isBefore(departureDateMax) &&
-                f.getSegments().get(0).getDepartureDate().isAfter(arrivalDateMin) &&
-                f.getSegments().get(0).getDepartureDate().isBefore(arrivalDateMax))).collect(Collectors.toList());
+        if (departureDateMin != null) {
+            flights = flights.stream().filter(f -> (
+                    f.getSegments().get(0).getDepartureDate().isAfter(departureDateMin))).collect(Collectors.toList());
+        }
+        if (departureDateMax != null) {
+            flights = flights.stream().filter(f -> (
+                    f.getSegments().get(0).getDepartureDate().isBefore(departureDateMax))).collect(Collectors.toList());
+        }
+        if (departureDateMax != null) {
+            flights = flights.stream().filter(f -> (
+                    f.getSegments().get(0).getArrivalDate().isAfter(arrivalDateMin))).collect(Collectors.toList());
+        }
+        if (departureDateMax != null) {
+            flights = flights.stream().filter(f -> (
+                    f.getSegments().get(0).getArrivalDate().isBefore(arrivalDateMax))).collect(Collectors.toList());
+        }
+        return flights;
+    }
+
+    public static List<Flight> filter(Integer hours) {
+        List<Flight> flights = createFlights();
+        flights = flights.stream().filter(f -> (
+                f.getSegments().size() > 1)).collect(Collectors.toList());
+        flights = flights.stream().filter(f -> (
+                (Duration.between(f.getSegments().get(0).getDepartureDate().toLocalTime(), f.getSegments().get(1).getArrivalDate().toLocalTime())).toHoursPart() > hours)
+        ).collect(Collectors.toList());
+        return flights;
     }
 }

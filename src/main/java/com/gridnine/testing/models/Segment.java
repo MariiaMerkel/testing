@@ -8,6 +8,7 @@ import java.util.Objects;
  * Bean that represents a flight segment.
  */
 public class Segment {
+
     private final LocalDateTime departureDate;
 
     private final LocalDateTime arrivalDate;
@@ -21,7 +22,7 @@ public class Segment {
         return departureDate;
     }
 
-    LocalDateTime getArrivalDate() {
+    public LocalDateTime getArrivalDate() {
         return arrivalDate;
     }
 
