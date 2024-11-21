@@ -2,11 +2,13 @@ package com.gridnine.testing.builders;
 
 import com.gridnine.testing.models.Flight;
 import com.gridnine.testing.models.Segment;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class FlightBuilder {
@@ -18,18 +20,18 @@ public class FlightBuilder {
                 createFlight(threeDaysFromNow, threeDaysFromNow.plusHours(2)),
                 //A normal multi segment flight
                 createFlight(threeDaysFromNow, threeDaysFromNow.plusHours(2),
-                             threeDaysFromNow.plusHours(3), threeDaysFromNow.plusHours(5)),
+                        threeDaysFromNow.plusHours(3), threeDaysFromNow.plusHours(5)),
                 //A flight departing in the past
                 createFlight(threeDaysFromNow.minusDays(6), threeDaysFromNow),
                 //A flight that departs before it arrives
                 createFlight(threeDaysFromNow, threeDaysFromNow.minusHours(6)),
                 //A flight with more than two hours ground time
                 createFlight(threeDaysFromNow, threeDaysFromNow.plusHours(2),
-                             threeDaysFromNow.plusHours(5), threeDaysFromNow.plusHours(6)),
+                        threeDaysFromNow.plusHours(5), threeDaysFromNow.plusHours(6)),
                 //Another flight with more than two hours ground time
                 createFlight(threeDaysFromNow, threeDaysFromNow.plusHours(2),
-                             threeDaysFromNow.plusHours(3), threeDaysFromNow.plusHours(4),
-                             threeDaysFromNow.plusHours(6), threeDaysFromNow.plusHours(7)));
+                        threeDaysFromNow.plusHours(3), threeDaysFromNow.plusHours(4),
+                        threeDaysFromNow.plusHours(6), threeDaysFromNow.plusHours(7)));
     }
 
     private static Flight createFlight(final LocalDateTime... dates) {
@@ -44,35 +46,95 @@ public class FlightBuilder {
         return new Flight(segments);
     }
 
-    public static List<Flight> filter(LocalDateTime departureDateMin, LocalDateTime departureDateMax, LocalDateTime arrivalDateMin, LocalDateTime arrivalDateMax) {
+    public static ArrayList<Flight> filterByArrivalDateMin(LocalDateTime arrivalDateMin) {
 
         List<Flight> flights = createFlights();
+        ArrayList<Flight> result = new ArrayList<>(flights);
+
+        if (arrivalDateMin != null) {
+
+            for (int i = 0; i < flights.size(); i++) {
+                int index = i;
+                List<Segment> segments = flights.get(i).getSegments();
+                segments.forEach(s -> {
+                    LocalDateTime arrival = s.getArrivalDate();
+                    if (s.getArrivalDate().isBefore(arrivalDateMin)) {
+                        result.remove(flights.get(index));
+                    }
+                });
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Flight> filterByArrivalDateMax(LocalDateTime arrivalDateMax) {
+        List<Flight> flights = createFlights();
+        ArrayList<Flight> result = new ArrayList<>(flights);
+        if (arrivalDateMax != null) {
+
+            for (int i = 0; i < flights.size(); i++) {
+                int index = i;
+                flights.get(i).getSegments().forEach(s -> {
+                    if (s.getArrivalDate().isAfter(arrivalDateMax)) {
+                        result.remove(flights.get(index));
+                    }
+                });
+            }
+        }
+        return result;
+    }
+
+    public static ArrayList<Flight> filterByDepartureDateMin(LocalDateTime departureDateMin) {
+        List<Flight> flights = createFlights();
+        ArrayList<Flight> result = new ArrayList<>(flights);
+
         if (departureDateMin != null) {
-            flights = flights.stream().filter(f -> (
-                    f.getSegments().get(0).getDepartureDate().isAfter(departureDateMin))).collect(Collectors.toList());
+
+            for (int i = 0; i < flights.size(); i++) {
+                int index = i;
+                flights.get(i).getSegments().forEach(s -> {
+                    if (s.getDepartureDate().isBefore(departureDateMin)) {
+                        result.remove(flights.get(index));
+                    }
+                });
+            }
         }
+        return result;
+    }
+
+    public static ArrayList<Flight> filterByDepartureDateMax(LocalDateTime departureDateMax) {
+        List<Flight> flights = createFlights();
+        ArrayList<Flight> result = new ArrayList<>(flights);
+
         if (departureDateMax != null) {
-            flights = flights.stream().filter(f -> (
-                    f.getSegments().get(0).getDepartureDate().isBefore(departureDateMax))).collect(Collectors.toList());
+
+            for (int i = 0; i < flights.size(); i++) {
+                int index = i;
+                flights.get(i).getSegments().forEach(s -> {
+                    if (s.getDepartureDate().isAfter(departureDateMax)) {
+                        result.remove(flights.get(index));
+                    }
+                });
+            }
         }
-        if (departureDateMax != null) {
-            flights = flights.stream().filter(f -> (
-                    f.getSegments().get(0).getArrivalDate().isAfter(arrivalDateMin))).collect(Collectors.toList());
-        }
-        if (departureDateMax != null) {
-            flights = flights.stream().filter(f -> (
-                    f.getSegments().get(0).getArrivalDate().isBefore(arrivalDateMax))).collect(Collectors.toList());
-        }
-        return flights;
+        return result;
     }
 
     public static List<Flight> filter(Integer hours) {
         List<Flight> flights = createFlights();
         flights = flights.stream().filter(f -> (
                 f.getSegments().size() > 1)).collect(Collectors.toList());
-        flights = flights.stream().filter(f -> (
-                (Duration.between(f.getSegments().get(0).getDepartureDate().toLocalTime(), f.getSegments().get(1).getArrivalDate().toLocalTime())).toHoursPart() > hours)
-        ).collect(Collectors.toList());
+        ArrayList<Flight> result = new ArrayList<>(flights);
+        for (int i = 0; i < flights.size(); i++) {
+            int index = i;
+            AtomicInteger transferHours = new AtomicInteger();
+            flights.get(i).getSegments().forEach(s -> {
+                transferHours.addAndGet(Duration.between(s.getArrivalDate().toLocalTime(), s.getDepartureDate().toLocalTime()).toHoursPart());
+            });
+            if (hours < transferHours.get()) {
+                result.remove(flights.get(index));
+            }
+        }
         return flights;
     }
 }

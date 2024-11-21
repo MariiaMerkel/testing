@@ -9,43 +9,41 @@ import java.util.Objects;
  */
 public class Segment {
 
-    private final LocalDateTime departureDate;
-
     private final LocalDateTime arrivalDate;
 
-    public Segment(final LocalDateTime dep, final LocalDateTime arr) {
-        departureDate = Objects.requireNonNull(dep);
-        arrivalDate = Objects.requireNonNull(arr);
-    }
+    private final LocalDateTime departureDate;
 
-    public LocalDateTime getDepartureDate() {
-        return departureDate;
+    public Segment(LocalDateTime arrivalDate, LocalDateTime departureDate) {
+        this.arrivalDate = arrivalDate;
+        this.departureDate = departureDate;
     }
 
     public LocalDateTime getArrivalDate() {
         return arrivalDate;
     }
 
+    public LocalDateTime getDepartureDate() {
+        return departureDate;
+    }
+
     @Override
     public String toString() {
         DateTimeFormatter fmt =
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-        return '[' + departureDate.format(fmt) + '|' + arrivalDate.format(fmt)
+        return '[' + arrivalDate.format(fmt) + '|' + departureDate.format(fmt)
                 + ']';
     }
 
-    @Override public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Segment segment = (Segment) o;
-        return Objects.equals(departureDate, segment.departureDate) && Objects.equals(arrivalDate, segment.arrivalDate);
+        return Objects.equals(arrivalDate, segment.arrivalDate) && Objects.equals(departureDate, segment.departureDate);
     }
 
-    @Override public int hashCode() {
-        return Objects.hash(departureDate, arrivalDate);
+    @Override
+    public int hashCode() {
+        return Objects.hash(arrivalDate, departureDate);
     }
 }
